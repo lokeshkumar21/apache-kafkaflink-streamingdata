@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example</groupId>
+    <artifactId>flink-kafka-rest</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Flink Kafka REST Async I/O</name>
+    <description>
+        Consume Kafka messages and asynchronously POST them to a REST API
+    </description>
+
+    <!-- ================================================= -->
+    <!-- Properties                                        -->
+    <!-- ================================================= -->
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Java -->
+        <maven.compiler.release>11</maven.compiler.release>
+
+        <!-- Apache Flink -->
+        <flink.version>1.19.1</flink.version>
+
+        <!-- Apache Kafka Connector for Flink 1.19 -->
+        <kafka.connector.version>3.2.0-1.19</kafka.connector.version>
+
+        <!-- Kafka Java Client -->
+        <kafka.clients.version>3.7.0</kafka.clients.version>
+
+        <!-- Jackson JSON -->
+        <jackson.version>2.17.2</jackson.version>
+
+        <!-- Maven Plugins -->
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
+        <maven.shade.plugin.version>3.5.3</maven.shade.plugin.version>
+    </properties>
+
+    <!-- ================================================= -->
+    <!-- Dependencies                                      -->
+    <!-- ================================================= -->
+
+    <dependencies>
+
+        <!-- Flink Streaming API -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <version>1.19.1</version>
+        </dependency>
+
+        <!-- Flink Kafka Connector -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka</artifactId>
+            <version>3.2.0-1.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-base</artifactId>
+            <version>1.19.1</version>
+        </dependency>
+
+        <!-- Kafka Java Client -->
+        <!-- Normally supplied transitively by the Kafka connector.
+             Keep this explicit only if you need to control its version. -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.7.0</version>
+        </dependency>
+
+        <!-- Jackson JSON Processing -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+
+
+        <!-- Flink Clients: required to execute a local Flink job -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-clients</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+
+    </dependencies>
+
+    <!-- ================================================= -->
+    <!-- Build Configuration                               -->
+    <!-- ================================================= -->
+
+    <build>
+
+        <finalName>flink-kafka-rest-1.0.0</finalName>
+
+        <plugins>
+
+            <!-- Maven Compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+
+                <configuration>
+                    <release>11</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- Package Dependencies into an Executable JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+
+                        <configuration>
+
+                            <createDependencyReducedPom>
+                                false
+                            </createDependencyReducedPom>
+
+                            <transformers>
+
+                                <!-- Preserve ServiceLoader Registrations -->
+                                <transformer implementation=
+                                                     "org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+
+                                <!-- Main Class -->
+                                <transformer implementation=
+                                                     "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+
+                                    <mainClass>
+                                        com.example.KafkaToRestJob
+                                    </mainClass>
+
+<!--                                    <mainClass>-->
+<!--                                        com.example.KafkaToRestJob-->
+<!--                                    </mainClass>-->
+
+                                </transformer>
+
+                            </transformers>
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+</project>
